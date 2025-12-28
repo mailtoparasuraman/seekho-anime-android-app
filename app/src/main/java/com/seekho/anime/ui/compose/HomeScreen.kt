@@ -6,8 +6,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -94,8 +96,8 @@ fun AnimeItem(anime: AnimeEntity, onClick: (Int) -> Unit) {
                 contentDescription = null,
                 modifier = Modifier.size(80.dp, 120.dp),
                 contentScale = ContentScale.Crop,
-                placeholder = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background),
-                error = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background)
+                placeholder = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_image_placeholder),
+                error = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_image_placeholder)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {

@@ -21,17 +21,22 @@ class AnimeInfoViewModel(private val repository: AnimeRepository) : ViewModel() 
 
     fun fetchAnimeDetail(animeId: Int) {
         viewModelScope.launch {
-            _error.value = "Loading..." // Optional loading state
-            when (val result = repository.getAnimeDetail(animeId)) {
-                is Resource.Success -> {
-                    result.data?.let { _animeDetail.value = it }
-                }
-                is Resource.Error -> {
-                    _error.value = result.error?.message ?: "Error loading details"
-                    result.data?.let { _animeDetail.value = it }
-                }
-                is Resource.Loading -> {
-                    // Loading state if needed
+            repository.getAnimeDetail(animeId).collect { result ->
+                // Always update data if available (supports instant loading from cache)
+                result.data?.let { _animeDetail.value = it }
+                
+                when (result) {
+                    is Resource.Success -> {
+                        // Data already updated above
+                    }
+                    is Resource.Error -> {
+                         _error.value = result.error?.message ?: "Error loading details"
+                         // Data already updated above with cached version if available
+                    }
+                    is Resource.Loading -> {
+                        // We could show a loading indicator here if needed, 
+                        // but since we update data immediately, the UI will populate.
+                    }
                 }
             }
         }

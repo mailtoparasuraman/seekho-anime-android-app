@@ -11,11 +11,13 @@ import com.seekho.anime.data.repository.AnimeRepository
 import com.seekho.anime.util.Resource
 import kotlinx.coroutines.launch
 
+import androidx.lifecycle.switchMap
+
 class AnimeViewModel(private val repository: AnimeRepository) : ViewModel() {
 
     private val refreshTrigger = MutableLiveData(Unit)
     
-    val animeList: LiveData<Resource<List<AnimeEntity>>> = androidx.lifecycle.Transformations.switchMap(refreshTrigger) {
+    val animeList: LiveData<Resource<List<AnimeEntity>>> = refreshTrigger.switchMap {
         repository.getTopAnime().asLiveData()
     }
     

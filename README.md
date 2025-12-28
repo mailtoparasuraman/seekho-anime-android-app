@@ -1,39 +1,45 @@
-# Seekho Android App
+# Anime Showcase App
 
-## Overview
-A simple yet robust Android application that fetches and displays a list of top-rated anime using the Jikan API. It features offline support using Room Database, a clean MVVM architecture, and intuitive UI handling for various content states.
+Hello! This is a simple yet robust Android application I built to showcase modern Android development practices. It fetches and displays the "Top 25 Anime" using the Jikan API.
 
-## Features
-- **Top Anime List**: Fetches and displays popular anime series.
-- **Offline Support**: Caches data locally using Room to ensure the app works without an internet connection.
-- **Detail View**: Shows comprehensive information about a selected anime, including synopsis, genre, and cast.
-- **Video Trailer**: Plays the trailer if available.
-- **Robust Error Handling**: informative messages for network errors and empty states.
-- **Clean Architecture**: Follows MVVM + Repository pattern.
+I created this project to demonstrate my understanding of building clean, offline-first Android apps using both XML (Classic) and Jetpack Compose (Modern) UI toolkits.
 
-## Assumptions
-- The API is public and does not require an API key.
-- "No Profile Image" constraint is handled by hiding the image view, allowing the text content to take precedence, maintaining a clean look.
-- Data synchronization happens automatically when the app is launched or the list is refreshed (fetching fresh data and updating the local cache).
+---
+
+## Key Features
+
+*   **Dual UI Implementation:**
+    *   You can toggle between the classic XML-based UI and the modern Jetpack Compose UI right from the home screen. This shows I can work with both legacy and new codebases.
+*   **Offline First:**
+    *   The app works perfectly without internet! I used Room Database to cache data locally.
+    *   If you open the app offline, it shows the last saved data instantly.
+*   **Smart Error Handling:**
+    *   It handles tricky scenarios like API Rate Limits (429) and network failures gracefully.
+    *   If you lose internet, the app waits and automatically refreshes the moment you come back online.
+*   **Main Cast & Details:**
+    *   Tap on any anime to see its synopsis, rating, episodes, and a horizontal scrollable list of the Main Cast members.
+    *   It uses a "progressive loading" technique—cached details show up instantly while the app fetches fresh data in the background.
 
 ## Tech Stack
-- **Language**: Kotlin
-- **Architecture**: MVVM (Model-View-ViewModel)
-- **Network**: Retrofit + Gson
-- **Database**: Room
-- **Async**: Coroutines + Flow
-- **Image Loading**: Glide
-- **DI**: Manual Dependency Injection
 
-## Setup Instructions
-1. Clone the repository.
-2. Open in Android Studio (Ladybug or newer recommended).
-3. Sync Gradle.
-4. Run on an emulator or physical device.
+I chose a solid, production-ready stack for this project:
 
-## Known Limitations
-- The "Main Cast" on the detail screen is currently static or not fully implemented as the primary Jikan endpoint creates a deeper nested structure that was simplified for this exercise (or requires a separate API call).
-- Video playback simply opens the URL or uses a basic WebView/VideoView depending on the implementation depth requested. (Here implemented as a simple redirection or placeholder).
+*   **Language:** Kotlin
+*   **Architecture:** MVVM (Model-View-ViewModel) + Repository Pattern
+*   **Network:** Retrofit + OkHttp
+*   **Database:** Room (SQLite)
+*   **Image Loading:** Glide (for XML) & Coil (for Compose)
+*   **Asynchronous:** Kotlin Coroutines & Flow
 
-## License
-MIT
+## How to Run
+
+1.  Clone this repository.
+2.  Open it in Android Studio.
+3.  Let Gradle sync (it might take a minute).
+4.  Run it on an Emulator or a real device.
+
+*Note: You don't need any API keys for Jikan, but please be mindful that the API has a rate limit, which the app handles automatically.*
+
+---
+
+Thanks for checking out my work! Feel free to reach out if you have any questions about the implementation.

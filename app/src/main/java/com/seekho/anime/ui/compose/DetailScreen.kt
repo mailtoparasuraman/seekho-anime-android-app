@@ -32,6 +32,7 @@ fun DetailScreen(
     onBackClick: () -> Unit
 ) {
     val anime by viewModel.animeDetail.observeAsState()
+    val error by viewModel.error.observeAsState()
     
     Scaffold(
         topBar = {
@@ -46,6 +47,7 @@ fun DetailScreen(
         }
     ) { padding ->
         anime?.let { detail ->
+            // Show Content
             Column(
                 modifier = Modifier
                     .padding(padding)
@@ -62,8 +64,8 @@ fun DetailScreen(
                             .fillMaxWidth()
                             .height(250.dp),
                         contentScale = ContentScale.Crop,
-                        placeholder = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background),
-                        error = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background)
+                        placeholder = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_image_placeholder),
+                        error = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_image_placeholder)
                     )
                 }
 
@@ -78,12 +80,48 @@ fun DetailScreen(
                     Text(text = "Synopsis", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(text = detail.synopsis ?: "No synopsis", style = MaterialTheme.typography.bodyMedium)
                     
-                    if (!detail.cast.isNullOrEmpty()) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = "Main Cast", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        CastList(detail.cast)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(text = "Main Cast", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    val cast = detail.cast
+                    if (cast == null) {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                            if (error != null) {
+                                Text(
+                                    text = "Could not load cast information.",
+                                    style = MaterialTheme.typography.bodySmall, 
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                )
+                            } else {
+                                CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                            }
+                        }
+                    } else if (cast.isNotEmpty()) {
+                        CastList(cast)
+                    } else {
+                        Text(text = "No cast information available.", style = MaterialTheme.typography.bodySmall, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
                     }
+                }
+            }
+        } ?: run {
+            // No Data: Check for Error or Loading
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = androidx.compose.ui.Alignment.Center
+            ) {
+                error?.let { errorMsg ->
+                     Text(
+                        text = errorMsg,
+                         color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } ?: run {
+                    CircularProgressIndicator()
                 }
             }
         }
@@ -118,8 +156,8 @@ fun CastList(cast: List<CastItemEntity>) {
                         .size(100.dp, 120.dp)
                         .fillMaxWidth(),
                     contentScale = ContentScale.Crop,
-                    placeholder = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background),
-                    error = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background)
+                    placeholder = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_image_placeholder),
+                    error = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_image_placeholder)
                 )
                 Text(text = item.name, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, maxLines = 1)
                 Text(text = item.role, style = MaterialTheme.typography.labelSmall, maxLines = 1)

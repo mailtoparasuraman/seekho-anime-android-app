@@ -12,11 +12,14 @@ interface AnimeDao {
     @Query("SELECT * FROM anime_table")
     fun getAllAnime(): Flow<List<AnimeEntity>>
 
+    @Query("SELECT * FROM anime_table")
+    suspend fun getAllAnimeSync(): List<AnimeEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(animeList: List<AnimeEntity>)
 
     @Query("SELECT * FROM anime_table WHERE mal_id = :id")
-    fun getAnimeById(id: Int): AnimeEntity?
+    suspend fun getAnimeById(id: Int): AnimeEntity?
 
     @Query("DELETE FROM anime_table")
     suspend fun clearAll()

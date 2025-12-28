@@ -27,20 +27,42 @@ class AnimeRepository(
         },
         saveFetchResult = { response ->
             db.withTransaction {
+                // Fetch existing data to preserve 'cast' information
+                val oldList = animeDao.getAllAnimeSync()
+                val oldMap = oldList.associateBy { it.mal_id }
+                
+                val newEntities = response.data.map { apiModel ->
+                    val newEntity = apiModel.toEntity()
+                    // If we already have this anime in cache, check if it has cast info.
+                    // If so, preserve it!
+                    val oldEntity = oldMap[newEntity.mal_id]
+                    if (oldEntity?.cast != null) {
+                        newEntity.copy(cast = oldEntity.cast)
+                    } else {
+                        newEntity
+                    }
+                }
+                
                 animeDao.clearAll()
-                val entities = response.data.map { it.toEntity() }
-                animeDao.insertAll(entities)
+                animeDao.insertAll(newEntities)
             }
         }
     )
     
-    suspend fun getAnimeDetail(id: Int): Resource<AnimeEntity> {
+    fun getAnimeDetail(id: Int): Flow<Resource<AnimeEntity>> = kotlinx.coroutines.flow.flow {
         val localAnime = animeDao.getAnimeById(id)
-        if (localAnime != null) {
-            return Resource.Success(localAnime)
+        
+        // Emit local data immediately as Loading (so UI shows up fast)
+        emit(Resource.Loading(localAnime))
+        
+        // If we have local data AND the cast info, we are good to go. 
+        // We can emit Success and stop here.
+        if (localAnime != null && localAnime.cast != null) {
+            emit(Resource.Success(localAnime))
+            return@flow
         }
 
-        return try {
+        try {
              val response = api.getAnimeDetails(id)
              val charactersResponse = api.getAnimeCharacters(id)
              
@@ -51,7 +73,7 @@ class AnimeRepository(
              db.withTransaction {
                  animeDao.insertAll(listOf(entity))
              }
-             Resource.Success(entity)
+             emit(Resource.Success(entity))
         } catch (e: Exception) {
             val error = when {
                 e is retrofit2.HttpException && e.code() == 429 -> {
@@ -62,7 +84,7 @@ class AnimeRepository(
                 }
                 else -> e
             }
-            Resource.Error(error)
+            emit(Resource.Error(error, localAnime))
         }
     }
 }

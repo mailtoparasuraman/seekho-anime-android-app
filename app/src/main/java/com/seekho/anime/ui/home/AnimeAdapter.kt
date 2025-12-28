@@ -47,8 +47,8 @@ class AnimeAdapter(
                 binding.ivPoster.visibility = android.view.View.VISIBLE
                 Glide.with(binding.ivPoster.context)
                     .load(anime.imageUrl)
-                    .placeholder(com.seekho.anime.R.drawable.ic_launcher_background)
-                    .error(com.seekho.anime.R.drawable.ic_launcher_background)
+                    .placeholder(com.seekho.anime.R.drawable.ic_image_placeholder)
+                    .error(com.seekho.anime.R.drawable.ic_image_placeholder)
                     .into(binding.ivPoster)
             } else {
                  // Design constraint: Handle no image

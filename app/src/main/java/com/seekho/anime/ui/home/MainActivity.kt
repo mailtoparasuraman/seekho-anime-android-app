@@ -48,13 +48,13 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        binding.btnXml.setOnClickListener {
-            binding.selectionLayout.visibility = View.GONE
-            binding.xmlContent.visibility = View.VISIBLE
-            setupXmlApp()
+        binding.xmlSelectionButton.setOnClickListener {
+            binding.selectionContainer.visibility = View.GONE
+            binding.contentLayoutXml.visibility = View.VISIBLE
+            initializeXmlUi()
         }
 
-        binding.btnCompose.setOnClickListener {
+        binding.composeSelectionButton.setOnClickListener {
             setContent {
                  com.seekho.anime.ui.compose.ComposeApp(
                      homeViewModel = viewModel,
@@ -67,39 +67,60 @@ class MainActivity : AppCompatActivity() {
                  )
             }
         }
-    }
-
-    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
-    private fun setupXmlApp() {
-        setupRecyclerView()
-        observeViewModel()
         setupNetworkCallback()
     }
+
+    /**
+     * Initializes the classic View-based UI (XML) components.
+     * Sets up the RecyclerView and ViewModel observations.
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+    private fun initializeXmlUi() {
+        setupAnimeList()
+        observeViewModel()
+    }
+
+    private lateinit var connectivityManager: ConnectivityManager
+    private lateinit var networkCallback: ConnectivityManager.NetworkCallback
+
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
     private fun setupNetworkCallback() {
-        val connectivityManager = getSystemService(ConnectivityManager::class.java)
+        connectivityManager = getSystemService(ConnectivityManager::class.java)
         val networkRequest = NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
             
-        connectivityManager.registerNetworkCallback(networkRequest, object : ConnectivityManager.NetworkCallback() {
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 super.onAvailable(network)
                 runOnUiThread {
-                     if (animeAdapter.currentList.isEmpty()) {
-                         Toast.makeText(this@MainActivity, "Syncing data...", Toast.LENGTH_SHORT).show()
+                     if (!isDestroyed) {
+                         // Check if data is missing using ViewModel source of truth
+                         val currentData = viewModel.animeList.value?.data
+                         if (currentData.isNullOrEmpty()) {
+                             Toast.makeText(this@MainActivity, "Syncing data...", Toast.LENGTH_SHORT).show()
+                         }
+                         viewModel.refresh()
                      }
                 }
             }
-        })
+        }
+        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::networkCallback.isInitialized && ::connectivityManager.isInitialized) {
+            connectivityManager.unregisterNetworkCallback(networkCallback)
+        }
     }
     
-    private fun setupRecyclerView() {
+    private fun setupAnimeList() {
         animeAdapter = AnimeAdapter { anime ->
             openAnimeDetail(anime.mal_id)
         }
 
-        binding.recyclerView.apply {
+        binding.animeContentList.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = animeAdapter
         }
@@ -116,22 +137,35 @@ class MainActivity : AppCompatActivity() {
         viewModel.animeList.observe(this) { resource ->
             when (resource) {
                  is com.seekho.anime.util.Resource.Loading -> {
-                     binding.progressBar.visibility = View.VISIBLE
+                     binding.loadingIndicator.visibility = View.VISIBLE
+                     binding.errorMessageView.visibility = View.GONE
                      resource.data?.let { animeAdapter.submitList(it) }
                  }
                  is com.seekho.anime.util.Resource.Success -> {
-                     binding.progressBar.visibility = View.GONE
+                     binding.loadingIndicator.visibility = View.GONE
+                     binding.errorMessageView.visibility = View.GONE
+                     binding.animeContentList.visibility = View.VISIBLE
                      animeAdapter.submitList(resource.data)
                  }
                  is com.seekho.anime.util.Resource.Error -> {
-                     binding.progressBar.visibility = View.GONE
-                     resource.data?.let { animeAdapter.submitList(it) }
+                     binding.loadingIndicator.visibility = View.GONE
                      
-                     // Check if data is present to enable "offline mode" visual or just error
-                     if (animeAdapter.currentList.isEmpty()) {
-                         Toast.makeText(this, resource.error?.message ?: "Unknown error", Toast.LENGTH_SHORT).show()
+                     // We use the data from the error resource or existing data
+                     val data = resource.data
+                     if (data != null) {
+                         animeAdapter.submitList(data)
+                     }
+                     
+                     // Check if effective data is empty
+                     if (data.isNullOrEmpty()) {
+                         // No data: Show Error Screen
+                         binding.errorMessageView.text = resource.error?.message ?: "Unknown error"
+                         binding.errorMessageView.visibility = View.VISIBLE
+                         binding.animeContentList.visibility = View.GONE
                      } else {
-                         // Data is present, but an error occurred (e.g., refresh failed due to network)
+                         // Data exists: Show Toast, ensure Content is visible
+                         binding.errorMessageView.visibility = View.GONE
+                         binding.animeContentList.visibility = View.VISIBLE
                          Toast.makeText(this, "${resource.error?.message}. Showing cached data.", Toast.LENGTH_SHORT).show()
                      }
                  }

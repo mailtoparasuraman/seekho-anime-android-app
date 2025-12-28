@@ -20,6 +20,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
+        android:id="@+id/detailScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -49,7 +50,7 @@
                  android:padding="20dp">
 
                 <TextView
-                    android:id="@+id/titleText"
+                    android:id="@+id/animeTitle"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -57,7 +58,7 @@
                     android:layout_height="wrap_content"/>
 
                 <TextView
-                    android:id="@+id/scoreText"
+                    android:id="@+id/animeScore"
                     android:layout_marginTop="8dp"
                     android:textColor="?attr/colorSecondary"
                     android:background="@drawable/rating_background"
@@ -74,7 +75,7 @@
                     android:layout_height="wrap_content"/>
 
                 <TextView
-                    android:id="@+id/genreListText"
+                    android:id="@+id/animeGenres"
                     android:layout_marginTop="8dp"
                     android:textStyle="italic"
                     android:textColor="?attr/colorPrimary"
@@ -82,7 +83,7 @@
                     android:layout_height="wrap_content"/>
 
                 <TextView
-                    android:id="@+id/synopsisText"
+                    android:id="@+id/animeSynopsis"
                     android:layout_marginTop="16dp"
                     android:textColor="?attr/colorOnSurface"
                     android:lineSpacingExtra="4dp"
@@ -90,6 +91,7 @@
                     android:layout_height="wrap_content"/>
 
                 <TextView
+                    android:id="@+id/castSectionTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Main Cast"
@@ -98,8 +100,15 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"/>
 
+                <ProgressBar
+                    android:id="@+id/castLoadingProgress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="gone" />
+
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/castRecyclerView"
+                    android:id="@+id/castListRecycler"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -109,4 +118,16 @@
 
         </LinearLayout>
     </ScrollView>
+    <TextView
+        android:id="@+id/errorStateMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="Error loading details"
+        android:textColor="?attr/colorError"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
