@@ -127,8 +127,12 @@ class MainActivity : AppCompatActivity() {
                      binding.progressBar.visibility = View.GONE
                      resource.data?.let { animeAdapter.submitList(it) }
                      
+                     // Check if data is present to enable "offline mode" visual or just error
                      if (animeAdapter.currentList.isEmpty()) {
                          Toast.makeText(this, resource.error?.message ?: "Unknown error", Toast.LENGTH_SHORT).show()
+                     } else {
+                         // Data is present, but an error occurred (e.g., refresh failed due to network)
+                         Toast.makeText(this, "${resource.error?.message}. Showing cached data.", Toast.LENGTH_SHORT).show()
                      }
                  }
             }

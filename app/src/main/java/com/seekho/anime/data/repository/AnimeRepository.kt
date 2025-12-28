@@ -5,6 +5,7 @@ import com.seekho.anime.core.network.AnimeApiService
 import com.seekho.anime.core.database.AnimeEntity
 import com.seekho.anime.core.database.AppDatabase
 import com.seekho.anime.util.toEntity
+import com.seekho.anime.util.toCastEntityList
 import com.seekho.anime.util.Resource
 import com.seekho.anime.util.networkBoundResource
 import kotlinx.coroutines.delay
@@ -52,7 +53,16 @@ class AnimeRepository(
              }
              Resource.Success(entity)
         } catch (e: Exception) {
-            Resource.Error(e)
+            val error = when {
+                e is retrofit2.HttpException && e.code() == 429 -> {
+                    Exception("Rate limit exceeded. Please wait a moment.")
+                }
+                e is java.io.IOException -> {
+                    Exception("No internet connection. Please check your network.")
+                }
+                else -> e
+            }
+            Resource.Error(error)
         }
     }
 }

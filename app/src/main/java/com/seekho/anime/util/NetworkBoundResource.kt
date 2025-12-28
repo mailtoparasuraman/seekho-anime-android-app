@@ -18,7 +18,16 @@ fun <ResultType, RequestType> networkBoundResource(
             query().map { Resource.Success(it) }
             
         } catch (throwable: Throwable) {
-            query().map { Resource.Error(throwable, it) }
+            val error = when {
+                throwable is retrofit2.HttpException && throwable.code() == 429 -> {
+                    Exception("Rate limit exceeded. Please wait a moment.")
+                }
+                throwable is java.io.IOException -> {
+                    Exception("No internet connection. Please check your network.")
+                }
+                else -> throwable
+            }
+            query().map { Resource.Error(error, it) }
         }
         
     } else {

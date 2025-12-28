@@ -2,6 +2,7 @@ package com.seekho.anime.core.network
 
 import com.seekho.anime.data.model.AnimeDetailResponse
 import com.seekho.anime.data.model.TopAnimeResponse
+import com.seekho.anime.data.model.CharacterResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path

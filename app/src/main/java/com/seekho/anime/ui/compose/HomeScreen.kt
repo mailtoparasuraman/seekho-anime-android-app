@@ -26,31 +26,54 @@ fun HomeScreen(
 ) {
     val animeState by viewModel.animeList.observeAsState(Resource.Loading())
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    // Show snackbar on error if data is present
+    LaunchedEffect(animeState) {
+        if (animeState is Resource.Error) {
+             snackbarHostState.showSnackbar(
+                 message = animeState.error?.message ?: "Unknown Error"
+             )
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Anime Series (Compose)") })
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            when (val resource = animeState) {
-                is Resource.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-                is Resource.Error -> {
-                    Text(
-                        text = resource.error?.message ?: "Unknown Error",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                is Resource.Success -> {
-                    val list = resource.data ?: emptyList()
-                    LazyColumn {
-                        items(list) { anime ->
-                            AnimeItem(anime, onAnimeClick)
-                        }
+            val resource = animeState
+            // Show list if data exists (Success or Error with cached data)
+            if (resource.data != null && resource.data.isNotEmpty()) {
+                LazyColumn {
+                    items(resource.data) { anime ->
+                        AnimeItem(anime, onAnimeClick)
                     }
                 }
+            } else if (resource is Resource.Loading) {
+                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (resource is Resource.Error) {
+                 // Error and no data
+                 Column(
+                     modifier = Modifier.align(Alignment.Center),
+                     horizontalAlignment = Alignment.CenterHorizontally
+                 ) {
+                     Text(
+                        text = resource.error?.message ?: "Unknown Error",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                     Button(onClick = { /* Retry logic could be added here */ }) {
+                         Text("Retry")
+                     }
+                 }
+            }
+            
+            // Show loading indicator on top if refreshing
+            if (resource is Resource.Loading && resource.data != null) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter))
             }
         }
     }
@@ -70,7 +93,9 @@ fun AnimeItem(anime: AnimeEntity, onClick: (Int) -> Unit) {
                 model = anime.imageUrl,
                 contentDescription = null,
                 modifier = Modifier.size(80.dp, 120.dp),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                placeholder = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background),
+                error = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {

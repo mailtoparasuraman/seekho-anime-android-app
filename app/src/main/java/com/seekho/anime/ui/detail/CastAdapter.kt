@@ -27,6 +27,8 @@ class CastAdapter : ListAdapter<CastItemEntity, CastAdapter.CastViewHolder>(Cast
             
             Glide.with(itemView.context)
                 .load(item.imageUrl)
+                .placeholder(com.seekho.anime.R.drawable.ic_launcher_background)
+                .error(com.seekho.anime.R.drawable.ic_launcher_background)
                 .into(binding.castImage)
         }
     }

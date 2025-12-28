@@ -61,7 +61,9 @@ fun DetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(250.dp),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        placeholder = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background),
+                        error = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background)
                     )
                 }
 
@@ -115,7 +117,9 @@ fun CastList(cast: List<CastItemEntity>) {
                     modifier = Modifier
                         .size(100.dp, 120.dp)
                         .fillMaxWidth(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    placeholder = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background),
+                    error = androidx.compose.ui.res.painterResource(com.seekho.anime.R.drawable.ic_launcher_background)
                 )
                 Text(text = item.name, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, maxLines = 1)
                 Text(text = item.role, style = MaterialTheme.typography.labelSmall, maxLines = 1)

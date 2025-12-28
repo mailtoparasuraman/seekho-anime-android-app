@@ -13,7 +13,15 @@ import kotlinx.coroutines.launch
 
 class AnimeViewModel(private val repository: AnimeRepository) : ViewModel() {
 
-    val animeList: LiveData<Resource<List<AnimeEntity>>> = repository.getTopAnime().asLiveData()
+    private val refreshTrigger = MutableLiveData(Unit)
+    
+    val animeList: LiveData<Resource<List<AnimeEntity>>> = androidx.lifecycle.Transformations.switchMap(refreshTrigger) {
+        repository.getTopAnime().asLiveData()
+    }
+    
+    fun refresh() {
+        refreshTrigger.value = Unit
+    }
 
 }
 
